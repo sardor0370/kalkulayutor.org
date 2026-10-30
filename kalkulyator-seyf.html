@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uz"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Kalkulyator</title>
+<style>
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.scr{position:fixed;inset:0;display:none;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.scr.on{display:flex;animation:in .4s cubic-bezier(.2,.8,.2,1)}
+@keyframes in{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+/* splash */
+#sp{z-index:99;background:radial-gradient(circle at 50% 45%,#1a1033,#000 70%);align-items:center;justify-content:center;transition:opacity .7s,transform .7s}
+#sp.out{opacity:0;transform:scale(1.15);pointer-events:none}
+.mb{font-size:15px;letter-spacing:.5em;color:#8b7fb8;opacity:0;animation:fd 1s .2s forwards}
+.nm{font-size:clamp(46px,14vw,84px);font-weight:800;display:flex;margin-top:6px}
+.nm span{opacity:0;display:inline-block;transform:translateY(40px) rotate(8deg);background:linear-gradient(180deg,#fff,#ffb340 60%,#ff6a00);-webkit-background-clip:text;background-clip:text;color:transparent;animation:lt .7s forwards cubic-bezier(.2,1.4,.4,1)}
+.bar{height:3px;width:0;margin-top:14px;border-radius:3px;background:linear-gradient(90deg,#7c4dff,#ff9f0a);animation:bw 1.4s 1s forwards}
+@keyframes lt{to{opacity:1;transform:none}}
+@keyframes fd{to{opacity:1}}
+@keyframes bw{to{width:min(60vw,260px)}}
+/* calculator */
+#c{max-width:440px;margin:0 auto;width:100%}
+.dp{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;padding:20px 26px 10px;overflow:hidden}
+#h{color:#8e8e93;font-size:22px;min-height:28px;transition:.3s}
+#d{font-size:84px;font-weight:300;line-height:1.1;white-space:nowrap;transition:font-size .15s}
+.ks{flex:0 0 64%;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:12px;padding:12px 16px 18px}
+.ks button{border-radius:999px;font-size:32px;animation:pop .45s backwards cubic-bezier(.2,1.5,.4,1);transition:transform .12s,filter .12s}
+.ks button:active{transform:scale(.9);filter:brightness(1.7)}
+.g{background:#a5a5a5;color:#000}.k{background:#333}.o{background:#ff9f0a;font-size:38px!important}
+.z{grid-column:span 2;text-align:left;padding-left:12%}
+@keyframes pop{from{opacity:0;transform:scale(.4) translateY(30px)}}
+/* vault */
+.vs{background:linear-gradient(160deg,#0d1226,#130a26 60%,#060810)}
+.hd{display:flex;align-items:center;gap:12px;padding:14px 16px;backdrop-filter:blur(14px);background:#ffffff0d;border-bottom:1px solid #ffffff14}
+.hd h1{flex:1;font-size:21px;font-weight:700}
+.ic{width:42px;height:42px;border-radius:14px;background:#ffffff14;font-size:20px;transition:.2s}
+.ic:active{transform:scale(.88);background:#ffffff30}
+.gr{flex:1;overflow:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:10px;align-content:start}
+.it{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;background:#ffffff10;border:1px solid #ffffff14;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px;text-align:center;cursor:pointer;animation:rs .5s backwards cubic-bezier(.2,1,.3,1);transition:transform .2s}
+.it:active{transform:scale(.94)}
+.it img,.it video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.it b{position:relative;font-size:26px;text-shadow:0 2px 8px #000}
+.it span{font-size:34px}.it small{font-size:11px;color:#b8b8d0;word-break:break-all;max-height:3.6em;overflow:hidden}
+@keyframes rs{from{opacity:0;transform:translateY(24px) scale(.9)}}
+#em{display:none;margin:auto;text-align:center;color:#9a9ac0;padding:30px;animation:in .6s}
+#em i{font-size:54px;display:block;margin-bottom:8px;font-style:normal;animation:fl 3s infinite ease-in-out}
+@keyframes fl{50%{transform:translateY(-10px)}}
+.fab{position:absolute;right:20px;bottom:calc(22px + env(safe-area-inset-bottom));width:62px;height:62px;border-radius:50%;font-size:32px;background:linear-gradient(135deg,#7c4dff,#ff9f0a);box-shadow:0 10px 30px #7c4dff66;animation:pop .6s .3s backwards cubic-bezier(.2,1.5,.4,1);transition:transform .2s}
+.fab:active{transform:scale(.88) rotate(90deg)}
+#m{position:fixed;inset:0;z-index:50;background:#000d;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px}
+#m.on{display:flex;animation:in .3s}
+#mb{max-width:100%;max-height:72vh;display:flex}
+#mb img,#mb video{max-width:100%;max-height:72vh;border-radius:16px}
+.dl{padding:18px 24px;border-radius:16px;background:#ffffff18;color:#fff;text-decoration:none;word-break:break-all}
+.row{display:flex;gap:12px}
+.bt{padding:12px 22px;border-radius:14px;background:#ffffff18;transition:.2s}.bt:active{transform:scale(.92)}.rd{background:#ff3b30}
+/* settings */
+.st{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.cd{padding:16px;border-radius:18px;background:#ffffff0d;border:1px solid #ffffff14;animation:rs .5s backwards}
+.cd label{display:block;font-size:16px;margin-bottom:8px}
+.cd input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid #ffffff22;background:#00000066;color:#fff;font-size:22px;letter-spacing:.1em;outline:0}
+.cd input:focus{border-color:#ff9f0a;box-shadow:0 0 0 3px #ff9f0a33}
+.ob{position:sticky;top:0;z-index:5;display:flex;gap:8px;padding:2px 0}.ob button{flex:1;padding:14px 0;border-radius:14px;font-size:26px;background:#2a2542;border:1px solid #ffffff22;transition:transform .12s}.ob button:active{transform:scale(.88);background:#ff9f0a}
+.nt{color:#9a9ac0;font-size:14px;line-height:1.5}
+.sv{padding:15px;border-radius:16px;font-size:18px;font-weight:700;background:linear-gradient(135deg,#7c4dff,#ff9f0a)}
+#t{position:fixed;left:50%;bottom:90px;transform:translate(-50%,30px);background:#fff;color:#000;padding:11px 20px;border-radius:999px;opacity:0;transition:.35s;z-index:80;pointer-events:none;font-weight:600}
+#t.on{opacity:1;transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+</style></head><body>
+
+<div class="scr on" id="sp"><div class="mb">MADE BY</div><div class="nm" id="nm"></div><div class="bar"></div></div>
+
+<div class="scr" id="c"><div class="dp"><div id="h"></div><div id="d">0</div></div><div class="ks" id="ks"></div></div>
+
+<div class="scr vs" id="v">
+ <div class="hd"><button class="ic" id="vb">←</button><h1 id="vt"></h1></div>
+ <div class="gr" id="g"></div>
+ <div id="em"><i>🔒</i>Hali hech narsa yo'q.<br>Pastdagi + tugmasi bilan qo'shing.</div>
+ <button class="fab" id="ad">+</button>
+ <input type="file" id="fi" multiple hidden>
+</div>
+
+<div class="scr vs" id="s">
+ <div class="hd"><button class="ic" id="sb">←</button><h1>🔑 Kombinatsiyalar</h1></div>
+ <div class="st" id="sl"></div>
+</div>
+
+<div id="m"><div id="mb"></div><div class="row"><button class="bt" id="mc">Yopish</button><button class="bt rd" id="md">O'chirish</button></div></div>
+<div id="t"></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const D={photos:{t:'Rasmlar',a:'image/*',i:'🖼️'},videos:{t:'Videolar',a:'video/*',i:'🎬'},files:{t:'Fayllar',a:'',i:'📁'}};
+const OPS='+−×÷';
+let C={videos:'123÷2',photos:'62÷2',files:'7×7'};
+try{Object.assign(C,JSON.parse(localStorage.getItem('cmb')||'{}'))}catch(e){}
+const toast=m=>{const t=$('#t');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200)};
+const show=id=>{document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));$('#'+id).classList.add('on')};
+
+/* splash */
+'Sardor'.split('').forEach((c,i)=>{const s=document.createElement('span');s.textContent=c;s.style.animationDelay=(.5+i*.13)+'s';$('#nm').appendChild(s)});
+setTimeout(()=>{$('#sp').classList.add('out');show('c');$('#sp').classList.add('out');$('#sp').style.display='flex';setTimeout(()=>$('#sp').remove(),800)},3000);
+
+/* storage (faqat shu ilova ichida) */
+const db=new Promise((r,j)=>{const q=indexedDB.open('vault',1);q.onupgradeneeded=()=>q.result.createObjectStore('f',{keyPath:'id',autoIncrement:true});q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)});
+const tx=async(mode,fn)=>{const d=await db;return new Promise((r,j)=>{const t=d.transaction('f',mode);const q=fn(t.objectStore('f'));t.oncomplete=()=>r(q&&q.result);t.onerror=()=>j(t.error)})};
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+
+/* calculator */
+let ex='',res=false;
+const keys=['AC','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','='];
+keys.forEach((k,i)=>{const b=document.createElement('button');b.textContent=k;b.style.animationDelay=(.05+i*.03)+'s';
+ b.className=i<3?'g':OPS.includes(k)||k==='='?'o':'k';if(k==='0')b.classList.add('z');b.onclick=()=>press(k);$('#ks').appendChild(b)});
+const fmt=s=>s.replace(/(\d+)(\.\d+)?/g,(m,a,b)=>a.replace(/\B(?=(\d{3})+(?!\d))/g,' ')+(b||''));
+function draw(){const t=ex||'0';const d=$('#d');d.textContent=fmt(t);const n=t.length;d.style.fontSize=n>14?'36px':n>10?'48px':n>7?'62px':'84px'}
+function calc(){let e=ex.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100');
+ while(/[+\-*/]$/.test(e))e=e.slice(0,-1);
+ if(!/^[\d.+\-*/() ]+$/.test(e))return null;
+ try{const r=Function('"use strict";return ('+e+')')();return isFinite(r)?parseFloat(r.toPrecision(12)):null}catch(x){return null}}
+function press(k){
+ if(res&&!OPS.includes(k)&&k!=='='&&k!=='⌫'&&k!=='%'){ex=k==='AC'?'':ex==='Xato'?'':''; }
+ if(ex==='Xato')ex='';
+ if(k==='AC'){ex='';$('#h').textContent=''}
+ else if(k==='⌫'){ex=res?'':ex.slice(0,-1);$('#h').textContent=''}
+ else if(k==='='){eq();return}
+ else if(OPS.includes(k)){if(!ex){if(k==='−')ex='−'}else{if(OPS.includes(ex.slice(-1)))ex=ex.slice(0,-1);if(ex!=='−')ex+=k}}
+ else if(k==='%'){if(/\d$/.test(ex))ex+='%'}
+ else if(k==='.'){const last=ex.split(/[+−×÷%]/).pop();if(!last.includes('.'))ex+=(last===''?'0.':'.')}
+ else if(!/%$/.test(ex)){ex+=k}
+ res=false;draw()}
+function eq(){
+ const k=ex.replace(/\s/g,'');if(!k)return;
+ let hit=null;if(k==='1+1')hit='set';else for(const n in C)if(C[n]===k)hit=n;
+ const r=calc();$('#h').textContent=k+' =';
+ if(r===null){ex='Xato';res=true;draw();return}
+ ex=String(r).replace('-','−');res=true;draw();
+ if(hit)setTimeout(()=>hit==='set'?openSet():openSec(hit),320)}
+
+/* vault */
+let cur='photos',curItem=null,urls=[];
+function lock(){$('#m').classList.remove('on');$('#mb').innerHTML='';urls.forEach(URL.revokeObjectURL);urls=[];ex='';res=false;$('#h').textContent='';draw();if(!$('#sp'))show('c')}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)lock()});
+$('#vb').onclick=lock;$('#sb').onclick=lock;
+async function openSec(k){cur=k;$('#vt').textContent=D[k].i+' '+D[k].t;$('#fi').accept=D[k].a;show('v');await render()}
+async function render(){
+ const all=(await tx('readonly',s=>s.getAll())).filter(x=>x.k===cur);
+ urls.forEach(URL.revokeObjectURL);urls=[];const g=$('#g');g.innerHTML='';$('#em').style.display=all.length?'none':'block';
+ all.forEach((x,i)=>{const u=URL.createObjectURL(x.b);urls.push(u);const e=document.createElement('div');e.className='it';e.style.animationDelay=Math.min(i,20)*45+'ms';
+  if(cur==='photos'){const im=new Image();im.src=u;e.appendChild(im)}
+  else if(cur==='videos'){e.innerHTML='<video muted preload="metadata"></video><b>▶</b>';e.firstChild.src=u+'#t=0.1'}
+  else{e.innerHTML='<span>📄</span><small></small>';e.querySelector('small').textContent=x.n}
+  e.onclick=()=>view(x,u);g.appendChild(e)})}
+function view(x,u){curItem=x;const b=$('#mb');b.innerHTML='';let e;
+ if(cur==='photos'){e=new Image();e.src=u}
+ else if(cur==='videos'){e=document.createElement('video');e.src=u;e.controls=true;e.autoplay=true;e.playsInline=true}
+ else{e=document.createElement('a');e.href=u;e.download=x.n;e.className='dl';e.textContent='⬇ '+x.n}
+ b.appendChild(e);$('#m').classList.add('on')}
+$('#mc').onclick=()=>{$('#m').classList.remove('on');$('#mb').innerHTML=''};
+$('#md').onclick=async()=>{if(!confirm('Butunlay o\'chirilsinmi?'))return;await tx('readwrite',s=>s.delete(curItem.id));$('#mc').onclick();render();toast('O\'chirildi')};
+$('#ad').onclick=()=>$('#fi').click();
+$('#fi').onchange=async e=>{const fs=[...e.target.files];if(!fs.length)return;
+ try{for(const f of fs)await tx('readwrite',s=>s.add({k:cur,n:f.name,b:f,t:Date.now()}));toast(fs.length+' ta qo\'shildi')}catch(x){toast('Joy yetmadi yoki xato')}
+ e.target.value='';render()};
+
+/* combinations */
+let fo=null;
+const norm=s=>s.replace(/\s/g,'').replace(/[*xX]/g,'×').replace(/\//g,'÷').replace(/-/g,'−');
+function openSet(){
+ fo=null;const L=$('#sl');L.innerHTML='<div class="ob">'+['+','−','×','÷','.'].map(o=>'<button data-o="'+o+'">'+o+'</button>').join('')+'</div>';
+ L.querySelectorAll('.ob button').forEach(b=>{b.onpointerdown=e=>e.preventDefault();b.onclick=()=>{const i=fo||$('#in_photos');if(!fo){i.focus();fo=i}const a=i.selectionStart==null?i.value.length:i.selectionStart,z=i.selectionEnd==null?a:i.selectionEnd;i.value=i.value.slice(0,a)+b.dataset.o+i.value.slice(z);i.setSelectionRange(a+1,a+1)}});
+ Object.keys(D).forEach((k,i)=>{const c=document.createElement('div');c.className='cd';c.style.animationDelay=i*.08+'s';
+  c.innerHTML='<label>'+D[k].i+' '+D[k].t+'</label><input inputmode="decimal" id="in_'+k+'" autocomplete="off">';L.appendChild(c);const inp=c.querySelector('input');inp.value=C[k];inp.onfocus=()=>{fo=inp}});
+ L.insertAdjacentHTML('beforeend','<div class="nt">Misol: 123÷2 yoki 62÷2. Yuqoridagi + − × ÷ tugmalari bilan belgi qo\'shing, keyin kalkulyatorda shuni yozib «=» bosasiz. Tasodifan yozib yubormaydigan murakkabroq misol tanlang.<br><br>1+1 — doimiy kombinatsiya, bu bo\'limni har doim ochadi.</div><button class="sv" id="sv">Saqlash</button>');
+ $('#sv').onclick=save;show('s')}
+function save(){
+ const N={};
+ for(const k in D){const v=norm($('#in_'+k).value);
+  if(!/^\d+(\.\d+)?([+−×÷]\d+(\.\d+)?)+$/.test(v))return toast(D[k].t+': noto\'g\'ri misol');
+  if(v==='1+1')return toast('1+1 band, boshqasini tanlang');
+  N[k]=v}
+ if(new Set(Object.values(N)).size<3)return toast('Kombinatsiyalar har xil bo\'lsin');
+ C=N;localStorage.setItem('cmb',JSON.stringify(C));toast('Saqlandi ✓');setTimeout(lock,900)}
+draw();
+</script></body></html>
